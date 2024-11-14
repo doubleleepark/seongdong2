@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Game</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body, html {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-family: 'RixXladywatermelonR';
+    overflow: hidden;
+  }
+  #password-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    /* background-color: #f3f3f3; */
+    /* background-image: url('background.jpg'); */
+  }
+  #password-page input {
+    font-family: 'RixXladywatermelonR';
+    /* margin: 10px 0; */
+    border: none;
+    padding: 10px;
+    font-size: 1em;
+  }
+  #password-page button {
+    font-family: 'RixXladywatermelonR';
+    padding: 10px;
+    font-size: 1em;
+  }
+  #password-page .btn {
+    border: none;
+    display: block;
+    text-align: center;
+    cursor: pointer;
+    text-transform: uppercase;
+    outline: none;
+    overflow: hidden;
+    position: relative;
+    color: #f2db2a;
+    font-weight: 700;
+    font-size: 15px;
+    background-color: #002f56;
+    padding: 8px 30px;
+    margin: 0 auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.20);
+  }
+  
+  #password-page .btn span {
+    position: relative; 
+    z-index: 1;
+  }
+  
+  #password-page .btn:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 490%;
+    width: 140%;
+    background: #990011;
+    -webkit-transition: all .5s ease-in-out;
+    transition: all .5s ease-in-out;
+    -webkit-transform: translateX(-98%) translateY(-25%) rotate(45deg);
+    transform: translateX(-98%) translateY(-25%) rotate(45deg);
+  }
+  
+  #password-page .btn:hover:after {
+    -webkit-transform: translateX(-9%) translateY(-25%) rotate(45deg);
+    transform: translateX(-9%) translateY(-25%) rotate(45deg);
+  }
+
+  #map-page {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .explain_button { 
+    border: none;
+    background-color: #333;
+    color: yellow;
+    font-family: 'RixXladywatermelonR';
+    text-decoration: underline;
+  }
+
+  /* Title styling */
+  .title {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    width: 100%;
+  }
+
+  /* Map container to enable panning */
+  .map-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    flex-grow: 1;
+    touch-action: pan-x pan-y; /* Enables touch-based scrolling */
+  }
+
+  /* Fixed map size for accurate positioning */
+  .map {
+    width: 1000px;
+    height: 1000px;
+    position: relative;
+  }
+  @font-face {
+    font-family: 'RixXladywatermelonR';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-4@1.0/RixXladywatermelonR.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+  /* Block styling */
+  .block {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    opacity: 0.9;
+    font-size: x-large;
+    /*background-color: orange;*/
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  /* Block positions - adjust to actual coordinates on the map */
+  #blockA {top: 170px; left: 650px; display: none;}
+  #blockB { top: 580px; left: 40px; }
+  #blockC { top: 300px; left: 300px; }
+  #blockD { top: 510px; left: 280px; }
+  #blockE { top: 600px; left: 550px; }
+  #blockF { top: 740px; left: 720px; }
+  #blockG { top: 340px; left: 740px; }
+  #blockH { top: 850px; left: 500px; }
+  #blockI { top: 700px; left: 300px; }
+  .A {background-color: #F30D1F;}
+  .B {background-color: #ac2430;}
+  .C {background-color: #d1ead3;}
+  .D {background-color: #ffec4f;}
+  .E {background-color: #13a632;}
+  .F {background-color: #aac61b;}
+  .G {background-color: #03569b;}
+  .H {background-color: #aaa5c7;}
+  .I {background-color: #ab8373;}
+
+  /* Popup styling */
+  .popup {
+    display: none;
+    position: fixed;
+    top: 20%;
+    left: 30%;
+    width: 40%;
+    background-color: white;
+    border: 2px solid black;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+
+    overflow-y: auto;
+  }
+  .final_popup{
+    position: fixed;
+    top: 20%;
+    left: 30%;
+    width: 40%;
+    background-color: white;
+    border: 2px solid black;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+  }
+  .final_popup h2 {
+    font-size: 1.5em;
+  }
+  .final_popup h3 {
+    font-size: 1.1em;
+  }
+  .popup h2 {
+    font-size: 1.5em;
+  }
+  .popup input {
+    width: 80%;
+    margin: 10px 0;
+  }
+
+  .popup button {
+    margin: 5px;
+  }
+
+  .completed {
+    background-color: black;
+    color: white;
+  }
+  .notice {
+    width: 90%;
+    height: 12%;
+    text-align: center;
+  }
+
+  .explain {
+    display: none;
+    position: fixed;
+    top: 15%;
+    left: 10%;
+    width: 80%;
+    background-color: white;
+    border: 2px solid black;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+  }
+  .color_box {
+    width: 100px;
+    height: 50px;
+    margin-bottom: 5px;
+    margin-left: 30%;
+    background-color: #825930;
+  }
+  .color_boxes {
+    display: flex;
+    gap: 10px
+  }
+  .color_boxB {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border-radius: 50%;
+    /* margin-left: 30%; */
+    background-color: #ac2430;
+  }
+  .color_boxC {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border-radius: 50%;
+    /* margin-left: 30%; */
+    background-color: #d1ead3;
+  }
+  .color_boxD {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border-radius: 50%;
+    /* margin-left: 30%; */
+    background-color: #ffec4f;
+  }
+  .color_boxE {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border-radius: 50%;
+    /* margin-left: 30%; */
+    background-color: #13a632;
+  }
+  .color_boxF {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border-radius: 50%;
+    /* margin-left: 30%; */
+    background-color: #aac61b;
+  }
+  .color_boxG {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border-radius: 50%;
+    /* margin-left: 30%; */
+    background-color: #03569b;
+  }
+  .color_boxH {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border-radius: 50%;
+    /* margin-left: 30%; */
+    background-color: #aaa5c7;
+  }
+  .color_boxI {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border-radius: 50%;
+    /* margin-left: 30%; */
+    background-color: #ab8373;
+  }
+  /* 모달 기본 스타일 */
+  .modal {
+      display: none; /* 기본적으로 숨김 */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+      justify-content: center;
+      align-items: center;
+  }
+
+  .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+  }
+
+  .close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+  }
+
+  /* 강조할 텍스트 색상 */
+  .highlight {
+      color: red; /* 원하는 강조 색상 */
+      font-weight: bold;
+  }
+
+  @media (max-width: 600px) {
+    .popup {
+      width: 80%;
+      top: 10%;
+      left: 10%;
+      padding: 10px;
+    }
+    .final_popup{
+      width: 80%;
+      top: 10%;
+      left: 10%;
+      padding: 10px;
+    }
+    .final_popup h2 {
+      font-size: 1.2em;
+    }
+    .final_popup h3 {
+      font-size: 0.9em;
+    }
+    .popup h2 {
+      font-size: 1.2em;
+    }
+
+    .popup input {
+      width: 100%;
+      font-size: 1em;
+      font-family: 'RixXladywatermelonR';
+    }
+
+    .popup button {
+      font-size: 0.9em;
+        border: none;
+        /* background-color: #ac2430; */
+        color: black;
+        font-family: 'RixXladywatermelonR';
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Password Page -->
+<div id="password-page">
+  <video style="height: 100%; width: auto;" autoplay muted playsinline disablePictureInPicture preload="auto">
+    <source src="background-video.mp4" type="video/mp4">
+  </video>
+
+   <!-- 비디오 위에 올릴 콘텐츠 -->
+  <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; z-index: 1;">
+    
+    <div class="notice" style="text-align: center; margin-top: 50px;">
+      <p>(주)리스타트와 알파라운드가 협약해 만든 게임입니다.</p>
+      <p>성수 일대를 걸으며 다양한 게임을 통해 목적지에 도달하세요. 도달시 다양한 상품이 있어요.</p>
+    </div>
+    
+    <input type="password" id="passwordInput" placeholder="비밀번호를 입력하세요">
+    
+    <div class="button_container" style="margin-top: 20px;">
+      <button onclick="verifyPassword()" class="btn"><span>Start</span></button>
+    </div>
+    
+    <p id="errorMessage" style="color: red; margin-top: 10px;"></p>
+  </div>
+</div>  
+
+<audio id="successSound" src="딩동댕(합격).wav"></audio>
+<audio id="errorSound" src="땡(불합격).wav"></audio>
+<audio id="finalSound" src="박수(최종합격).mp3"></audio>
+  
+<!-- notice_explain -->
+<div id="explain" class="explain">
+    <h2>설명</h2>
+    <div class="color-box"></div>
+    <p style="margin-bottom: 5px;">- 본 게임은 색찾아 꿈찾아 여행 테마입니다.</p>
+    <p style="margin-bottom: 5px;">- 아래의 색상이 어떤 색(블록B~I)의 조합으로 이뤄진 색상일지 맞춰보세요.</p>
+    <p style="margin-bottom: 5px; color: #990011;">- 각 블록은 최종 장소에서 상품을 위한 힌트를 가지고 있어요.</p>
+    <p style="margin-bottom: 5px;">- 조합은 3가지이고 정답 조합이 포함된 경우 최종 목적지에 대한 HINT를 제공하는 블록 A가 생성됩니다.</p>
+    <p style="margin-bottom: 5px;">- 최종 목적지에 도착하여 다양한 체험과 경품을 받아보세요.</p>
+    <div class="color_box"></div>
+    <p style="margin-bottom: 5px;">위 색상은 지도의 어떤 색상들의 조합으로 이뤄졌을 지 맞춰보세요.</p>
+    <div class="color_boxes">
+      <div class="color_boxB">B</div> <div class="color_boxC">C</div> <div class="color_boxD">D</div> <div class="color_boxE">E</div> 
+    </div>
+    <div class="color_boxes">
+      <div class="color_boxF">F</div> <div class="color_boxG">G</div> <div class="color_boxH">H</div> <div class="color_boxI">I</div> 
+    </div>
+    <p style="margin-bottom: 5px;"><strong>- 블록을 클릭하면 게임과 관련된 문제가 제공됩니다.(hint 없을지? 있을지도?)</strong></p>
+    <button style="margin: 10px 0 0 0;" onclick="closeExplanation()">Close</button>
+  </div>
+
+<!-- Map Page -->
+<div id="map-page">
+    <div class="title">성수 야외방탈출
+        <button class="explain_button" onclick="openExplanation()">설명 다시 보기</button>
+    </div>
+  
+    <div class="map-container">
+      <div class="map">
+        <img src="map3.jpg" alt="Map" style="width: 100%; height: 100%;">
+        <div id="blockA" class="block A" onclick="openPopup('A')">A</div>
+        <div id="blockB" class="block B" onclick="openPopup('B')">B</div>
+        <div id="blockC" class="block C" onclick="openPopup('C')">C</div>
+        <div id="blockD" class="block D" onclick="openPopup('D')">D</div>
+        <div id="blockE" class="block E" onclick="openPopup('E')">E</div>
+        <div id="blockF" class="block F" onclick="openPopup('F')">F</div>
+        <div id="blockG" class="block G" onclick="openPopup('G')">G</div>
+        <div id="blockH" class="block H" onclick="openPopup('H')">H</div>
+        <div id="blockI" class="block I" onclick="openPopup('I')">I</div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="popup" class="popup">
+    <h2 id="questionText">Question</h2>
+    <div id="blockADescription" style="display: none;">
+        <p style="color: rgb(243, 13, 31); font-weight: bold;">해당 블록의 색상과 아래 이미지를 보고 최종장소를 추측하세요.</p>
+        <img src="최종방탈출_퀴즈.png" alt="Block A Image" id="blockAImage" style="width: 100%; height: 400px;">
+    </div>
+    <input type="text" id="answerInput" placeholder="Enter answer here">
+    <button id="color_button" onclick="submitAnswer()">Submit</button>
+    <button id="hint1" onclick="showHint(1)">Hint 1</button>
+    <button id="hint2" onclick="showHint(2)">Hint 2</button>
+    <button onclick="closePopup()">Close</button>
+    <p id="hintText"></p>
+  </div>
+  
+  <div id="final_popup" class="final_popup" style="display: none;">
+    <h2>어떤 코스로 완료했을까요?</h2>
+    <p>해당 화면을 캡쳐해서 완료하신 코스를 최종 목적지인 <strong>'아차산 13길 31 커피식구'</strong>로 와서 직원에게 보여주세요.</p>
+    <h3 style="font-size: larger;">최종 힌트: 획득한 힌트를 가지고 최종 장소에서 아이들의 꿈을 찾아보세요.</h3>
+    <p id="final_answer1"></p>
+    <p id="final_answer2" style="color:#990011"></p>
+    <button onclick="closePopup2()">Close</button>
+  </div>
+  <div id="customAlert" class="modal">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeCustomAlert()">&times;</span>
+        <p id="alertMessage"></p>
+    </div>
+  </div>
+
+  <script>
+    const correctPassword = "240612";
+  
+    function verifyPassword() {
+      const passwordInput = document.getElementById("passwordInput").value;
+      const errorMessage = document.getElementById("errorMessage");
+  
+      if (passwordInput === correctPassword) {
+        document.getElementById("password-page").style.display = "none";
+        document.getElementById("map-page").style.display = "flex";
+        document.getElementById('explain').style.display='grid';
+
+      } else {
+        errorMessage.innerText = "Incorrect password. Please try again.";
+      }
+    }
+  
+    const questions = {
+      A: { question: '최종 장소 퀴즈\n(힌트존재)', hint1: 'OOO OO길 OO',answer: '아차산 13길 31'},  
+      B: { question: "성수역 내부에 수제화 전시회로 가서 18세기 유럽 여성들 사이에서 유행한 슬리퍼 형태의 구두를 찾으세요.\n(힌트존재)",hint1:'문제에 정답이?', answer: "슬리퍼", correct_hint:'열정(passion)' },
+      C: { question: "해당 블록의 소 공원으로 이동하세요.", answer: "손오공", correct_hint: '재료' },
+      D: { question: "해당 블록에서 가장 핫 한 카페 근처 전봇대에 QR코드를 찾으세요", answer: "묵찌빠",correct_hint:'기쁨', hint1:'양파' },
+      E: { question: "무진장 신발 사진이 많은 곳을 찾아가세요. 해당 건물은 몇 층일까요? (숫자만 입력)\n(정답을 제출하고 HINT를 누르면 UP, DOWN으로 힌트 제공)", answer: "30", hint1: "", hint2: "",correct_hint:'파킨슨증후군' },
+      F: { question: "해당 블록에서 2개의 허브를 담고 있는 건물의 이름은?(띄어쓰기X, 힌트O)", answer: "아크밸리지식산업센터",correct_hint:'노력',hint1:'아크OOOOOOOO', hint2:'10글자' },
+      G: { question: "해당 블록에서 아이 벽화를 찾고 아이가 착용하고 있는 신발의 브랜드를 맞춰보세요.(한국말로 입력)", answer: "아디다스",correct_hint:'외계인', hint1:''},
+      H: { question: "이곳은 사람들에게 길잡이 역할도 해주며 교통의 중심 역할을 합니다. 학교와도 연관이 있는 이곳의 고유번호를 입력하세요.\n(힌트존재)", answer: "04533", hint1: "경수중학교와 연관이 있는 장소입니다.", hint2: "버스정류장입니다.",correct_hint:'아티스트' },
+      I: { question: "해당 블록에서 선글라스를 착용한 벽화를 찾아보고 선글라스를 착용한 캐릭터의 머리카락 개수를 숫자만 입력하세요.", answer: "5",correct_hint:'화가' }
+    };
+    
+    const correctCombinations = [
+    ["B", "D", "G"],
+    ["B", "C", "H"],
+    ["D", "H", "I"],
+    ["B", "E", "F"]
+    ];
+
+    let selectedAnswers = [];
+
+    function openPopup(block) {
+        const { question } = questions[block];
+        document.getElementById("questionText").innerText = question;
+        document.getElementById("popup").style.display = "block";
+        document.getElementById("answerInput").value = "";
+        document.getElementById("answerInput").dataset.block = block;
+        document.getElementById("hintText").innerText = "";
+        const blockElement = document.getElementsByClassName(`${block}`)[0];
+        const blockColor = window.getComputedStyle(blockElement).backgroundColor;
+        if(block === 'D'){
+          document.getElementById('color_button').style.color = '#ffb808';
+          document.getElementById('hint1').style.color = '#ffb808';
+          document.getElementById('hint2').style.color = '#ffb808';
+        } else{
+          document.getElementById('color_button').style.color = blockColor;
+          document.getElementById('hint1').style.color = blockColor;
+          document.getElementById('hint2').style.color = blockColor;
+        }        
+        // 블록 A의 경우 색상 설명, 이미지, 입력란 보이기
+        if (block === 'A') {
+            document.getElementById("blockADescription").style.display = "block";
+        } else {
+            document.getElementById("blockADescription").style.display = "none";
+        }
+    }
+  
+    function submitAnswer() {
+        const block = document.getElementById("answerInput").dataset.block;
+        const userAnswer = document.getElementById("answerInput").value.trim();
+        const correctAnswer = questions[block].answer;
+        const successSound = document.getElementById("successSound");
+        const errorSound = document.getElementById("errorSound");
+        const finalSound = document.getElementById("finalSound");
+        const { correct_hint } = questions[block];
+        if (userAnswer === correctAnswer) {
+            document.getElementById(`block${block}`).classList.add("completed");
+            selectedAnswers.push(block);
+            
+            if (block === "A") {
+              finalSound.play();
+              setTimeout(() => {
+                checkCombination2();
+            }, 500);
+            }
+            else {
+                successSound.play();
+
+                setTimeout(() => {
+                    alert(`정답입니다! \n 해당 색상 블록의 힌트는 ${correct_hint}입니다. \n 힌트를 조합해서 최종장소에서 상품을 획득해보세요.`);
+                    checkCombination1();
+                }, 500);
+            }
+                closePopup();
+        } else {
+            errorSound.play();
+
+            setTimeout(() => {
+            alert("다시 도전하세요.");
+        }, 500);
+        }
+    }
+    function checkCombination1() {
+        correctCombinations.forEach(combination => {
+            if (combination.every(val => selectedAnswers.includes(val))) {
+                const matchedCombination = combination.join(', ');
+                const hints = combination.map(block => questions[block].correct_hint).join(', ');
+
+                // 커스텀 모달을 통해 메시지 표시
+                showCustomAlert(`축하합니다! 오늘 당신의 길은 ${matchedCombination}입니다. 
+                                <br>이 조합의 힌트는: <span class="highlight">${hints}</span>입니다.
+                                <br>지도에서 추가된 코스 A를 찾아 마지막 퀴즈를 풀고 최종 장소로 오세요!`);
+                
+                document.getElementById('blockA').style.display = 'flex';
+            }
+        });
+    }
+
+    function showCustomAlert(message) {
+        const customAlert = document.getElementById("customAlert");
+        const alertMessage = document.getElementById("alertMessage");
+        alertMessage.innerHTML = message;
+        customAlert.style.display = "flex";
+    }
+
+    function closeCustomAlert() {
+        document.getElementById("customAlert").style.display = "none";
+    }
+
+
+    function checkCombination2() {
+        correctCombinations.forEach(combination => {
+        if (combination.every(val => selectedAnswers.includes(val))) {
+          // 맞춘 조합을 문자열로 변환해 출력할 수 있도록 설정
+          const matchedCombination = combination.join(', ');
+          const hints = combination.map(block => questions[block].correct_hint).join(', ');
+          // document.getElementById('blockA').style.display = 'flex';
+          
+          // 최종 목적지와 맞춘 조합을 팝업으로 보여주기 위한 함수 호출
+          showFinalPopup(matchedCombination, hints);
+        }
+      });
+    }
+    function showFinalPopup(matchedCombination, hints) {
+        document.getElementById('final_popup').style.display = 'block';
+        document.getElementById('final_answer1').innerText = matchedCombination;
+        const hints2 = '모은 힌트: '+hints;
+        document.getElementById('final_answer2').innerText = hints2;       
+      }
+
+      // 팝업 닫기 함수
+    function closeFinalPopup() {
+      const popup = document.querySelector('.popup');
+      if (popup) {
+        popup.remove();
+      }
+    }
+    function showHint(hintNumber) {
+      const block = document.getElementById("answerInput").dataset.block;
+      let hint = questions[block]["hint" + hintNumber];
+      const userAnswer = parseInt(document.getElementById('answerInput').value.trim(),10);
+      if (block==='E'){
+        document.getElementById("hintText").innerText = hint;
+        if(userAnswer<30) {
+          hint = 'UP';
+        } else {
+          hint='DOWN';
+        }
+      }
+      if (hint) {
+        document.getElementById("hintText").innerText = hint;
+      } else {
+        alert("힌트가 없습니다.");
+      }
+    }
+  
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+    function closePopup2() {
+      document.getElementById("final_popup").style.display = "none";
+    }
+    function openExplanation() {
+        document.getElementById("explain").style.display = "grid";
+    }
+    function closeExplanation() {
+        document.getElementById("explain").style.display = "none";
+    }
+  </script>
+
+</body>
+</html>
